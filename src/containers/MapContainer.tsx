@@ -6,13 +6,22 @@ import GoogleMaps from "../components/GoogleMap";
 const MapContainer = ({
   center,
   zoom,
+  startLocation,
+  endLocation,
 }: {
   center?: { lat: number; lng: number };
   zoom?: number;
+  startLocation: PlaceDetailResult | undefined;
+  endLocation: PlaceDetailResult | undefined;
 }) => {
   return (
     <div>
-      <GoogleMaps center={center} zoom={zoom} />
+      <GoogleMaps
+        center={center}
+        zoom={zoom}
+        startLocation={startLocation}
+        endLocation={endLocation}
+      />
     </div>
   );
 };

@@ -41,7 +41,12 @@ function App() {
               setStartLocation={setCenteredStartLocation}
               setEndLocation={setCenteredEndLocation}
             />
-            <MapContainer center={center} zoom={zoom} />
+            <MapContainer
+              center={center}
+              zoom={zoom}
+              startLocation={startLocation}
+              endLocation={endLocation}
+            />
           </Grid>
           <Grid item xs={4}>
             <div style={{ background: "red" }}>Lista kaikesta</div>
