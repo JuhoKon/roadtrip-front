@@ -67,3 +67,48 @@ export const RetrievePlaceDetails = async (
   console.log(res);
   return res.data.data.result;
 };
+
+export const CalculateDirections = async (
+  destination: string,
+  origin: string,
+  waypoints?: string[]
+): Promise<google.maps.DirectionsResult> => {
+  const res = await axios.post(API + `/directions`, {
+    destination,
+    origin,
+    waypoints,
+  });
+  console.log(res);
+
+  const result: any = res.data.data;
+  let newRequest: any = result;
+  newRequest["request"] = { travelMode: "DRIVING" };
+  let bounds = new google.maps.LatLngBounds(
+    result.routes[0].bounds.southwest,
+    result.routes[0].bounds.northeast
+  );
+
+  newRequest.routes[0].bounds = bounds;
+  newRequest.routes[0].overview_polyline =
+    newRequest.routes[0].overview_polyline.points;
+  console.log(newRequest);
+  return newRequest;
+};
+
+export const NearbySearch = async ({
+  location,
+  radius,
+  type,
+}: {
+  location: { lat: any; lng: any };
+  radius: number;
+  type: string;
+}) => {
+  const res = await axios.post(API + `/nearbysearch`, {
+    location,
+    radius,
+    type,
+  });
+
+  return res.data.data;
+};

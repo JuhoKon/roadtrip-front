@@ -1,6 +1,5 @@
 import React from "react";
 import { DirectionsService } from "@react-google-maps/api";
-import { PlaceDetailResult } from "../functions/GoogleMaps";
 enum TravelMode {
   BICYCLING = "BICYCLING",
   DRIVING = "DRIVING",
@@ -13,27 +12,22 @@ const DirectionServiceProvider = ({
   destination,
   origin,
   outputDirections,
+  waypoints,
 }: {
-  destination: {
-    lat: number;
-    lng: number;
-  };
-  origin: {
-    lat: number;
-    lng: number;
-  };
+  destination: google.maps.Place;
+  origin: google.maps.Place;
   outputDirections: (value: google.maps.DirectionsResult) => void;
+  waypoints?: google.maps.DirectionsWaypoint[];
 }) => {
-  const dest = new google.maps.LatLng(destination.lat, destination.lng);
-  const orig = new google.maps.LatLng(origin.lat, origin.lng);
   console.log(destination, origin);
   return (
     <DirectionsService
       // required
       options={{
-        destination: dest,
-        origin: orig,
+        destination: destination,
+        origin: origin,
         travelMode: TravelMode.DRIVING,
+        waypoints: waypoints,
       }}
       // required
       callback={(result) => {

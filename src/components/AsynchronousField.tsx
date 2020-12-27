@@ -8,15 +8,20 @@ import {
   RetrievePlaceDetails,
   PlaceDetailResult,
 } from "../functions/GoogleMaps";
+import { InputLabel } from "@material-ui/core";
 
 const debounce = require("lodash.debounce");
 
 export default function Asynchronous({
   setLocation,
   placeholder,
+  isStart,
+  isForForm,
 }: {
   setLocation: (selectedOption: PlaceDetailResult | undefined) => void;
   placeholder: string;
+  isStart: boolean;
+  isForForm: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -75,25 +80,37 @@ export default function Asynchronous({
         }
       }}
       renderInput={(params: any) => (
-        <TextField
-          {...params}
-          label={placeholder}
-          variant="outlined"
-          onChange={(e) => {
-            handleChange(e.target.value);
-          }}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
-        />
+        <>
+          {isForForm ? (
+            <InputLabel htmlFor="input-with-icon-adornment">
+              {isStart
+                ? "Select a starting location"
+                : "Select an end location"}
+              <br />
+              <br />
+            </InputLabel>
+          ) : null}
+
+          <TextField
+            {...params}
+            label={placeholder}
+            variant="outlined"
+            onChange={(e) => {
+              handleChange(e.target.value);
+            }}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
+            }}
+          />
+        </>
       )}
     />
   );

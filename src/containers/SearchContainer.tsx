@@ -12,6 +12,8 @@ const SearchContainer = ({
   return (
     <div style={{ maxWidth: "500px" }}>
       <SearchField
+        isForForm={true}
+        isStart={true}
         placeholder="Start location"
         setLocation={(selectedLocation: PlaceDetailResult | undefined) =>
           setStartLocation(selectedLocation)
@@ -19,6 +21,8 @@ const SearchContainer = ({
       />
       <br />
       <SearchField
+        isForForm={true}
+        isStart={false}
         placeholder="End location"
         setLocation={(selectedLocation: PlaceDetailResult | undefined) =>
           setEndLocation(selectedLocation)
