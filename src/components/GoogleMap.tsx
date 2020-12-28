@@ -1,14 +1,12 @@
 import React from "react";
 import {
   DirectionsRenderer,
-  DirectionsService,
   GoogleMap,
-  LoadScript,
   Marker,
   InfoWindow,
 } from "@react-google-maps/api";
-import DirectionServiceProvider from "./Directions";
-import { PlaceDetailResult, NearbySearch } from "../functions/GoogleMaps";
+
+import { NearbySearch } from "../functions/GoogleMaps";
 import { Button } from "@material-ui/core";
 
 var polyline = require("google-polyline");
@@ -17,34 +15,6 @@ const containerStyle = {
   height: "70vh",
   width: "100%",
 };
-function PolygonArray(latitude: any) {
-  const R = 6378137;
-  const pi = 3.14;
-  //distance in meters
-  const upper_offset = 1000;
-  const lower_offset = -1000;
-  let Lat_up = upper_offset / R;
-  let Lat_down = lower_offset / R;
-  //OffsetPosition, decimal degrees
-  let lat_upper = latitude + (Lat_up * 180) / pi;
-  let lat_lower = latitude + (Lat_down * 180) / pi;
-  return [lat_upper, lat_lower];
-}
-
-function PolygonPoints(waypoints: any) {
-  let polypoints = waypoints;
-  let PolyLength = polypoints.length;
-  let UpperBound = [];
-  let LowerBound = [];
-  for (let j = 0; j <= PolyLength - 1; j++) {
-    let NewPoints = PolygonArray(polypoints[j][0]);
-    UpperBound.push({ lat: NewPoints[0], lng: polypoints[j][1] });
-    LowerBound.push({ lat: NewPoints[1], lng: polypoints[j][1] });
-  }
-  let reversebound = LowerBound.reverse();
-  let FullPoly = UpperBound.concat(reversebound);
-  return FullPoly;
-}
 
 function MyComponent({
   center,
@@ -80,8 +50,9 @@ function MyComponent({
     let waypoints = [];
     if (directions && map !== null) {
       waypoints = polyline.decode(directions.routes[0].overview_polyline);
+      let promises = [];
       for (let i = 0; i < waypoints.length; i += 40) {
-        const res = await NearbySearch({
+        const promise = NearbySearch({
           location: {
             lat: waypoints[i][0],
             lng: waypoints[i][1],
@@ -89,12 +60,19 @@ function MyComponent({
           radius: 20000,
           type: "restaurant",
         });
-        results = results.concat(res.results);
+        promises.push(promise);
       }
-      console.log(results);
-      setMarkers(results);
-      for (const location of results) {
+      const searchResults = await Promise.all(promises);
+      for (const res of searchResults) {
+        results = res.results.concat(results);
       }
+      const uniqueArray = results.filter((obj: any, pos: any, arr: any) => {
+        return (
+          arr.map((mapObj: any) => mapObj.place_id).indexOf(obj.place_id) ===
+          pos
+        );
+      });
+      setMarkers(uniqueArray);
     }
   };
   return (
@@ -107,6 +85,15 @@ function MyComponent({
         }}
       >
         Get stuff
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          setMarkers(undefined);
+        }}
+      >
+        Clear markers
       </Button>
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -122,26 +109,11 @@ function MyComponent({
         onLoad={onLoad}
         onUnmount={onUnmount}
       >
-        {/* Child components, such as markers, info windows, etc. */}
         <>
           {directions && (
             <DirectionsRenderer
               options={{
                 directions: directions,
-              }}
-              // optional
-              onLoad={(directionsRenderer) => {
-                console.log(
-                  "DirectionsRenderer onLoad directionsRenderer: ",
-                  directionsRenderer
-                );
-              }}
-              // optional
-              onUnmount={(directionsRenderer) => {
-                console.log(
-                  "DirectionsRenderer onUnmount directionsRenderer: ",
-                  directionsRenderer
-                );
               }}
             />
           )}
@@ -153,7 +125,7 @@ function MyComponent({
 }
 const Stars = (stars: any) => {
   console.log(stars);
-  if (!stars) return <></>;
+  if (typeof stars.stars === "undefined") return <></>;
   const numberOfStars = Math.round(stars.stars);
   console.log(numberOfStars);
   const goldenStar = (

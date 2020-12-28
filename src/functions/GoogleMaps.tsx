@@ -64,7 +64,6 @@ export const RetrievePlaceDetails = async (
   const res = await axios.get(
     API + `/place_details?placeID=${encodeURI(place_id)}`
   );
-  console.log(res);
   return res.data.data.result;
 };
 
@@ -78,8 +77,6 @@ export const CalculateDirections = async (
     origin,
     waypoints,
   });
-  console.log(res);
-
   const result: any = res.data.data;
   let newRequest: any = result;
   newRequest["request"] = { travelMode: "DRIVING" };

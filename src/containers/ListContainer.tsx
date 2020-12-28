@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { render } from "react-dom";
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import arrayMove from "array-move";
 import ListItem from "../components/ListItem";
@@ -24,16 +23,28 @@ const useStyles = makeStyles((theme: any) => ({
   },
 }));
 
-const SortableItem = SortableElement(({ item }: any) => (
-  <ListItem name={item.name} adr_address={item.adr_address} url={item.url} />
+const SortableItem = SortableElement(({ item, removeListItem }: any) => (
+  <ListItem
+    name={item.name}
+    adr_address={item.adr_address}
+    url={item.website}
+    mapsURL={item.url}
+    removeListItem={removeListItem}
+    place_id={item.place_id}
+  />
 ));
 
-const SortableList = SortableContainer(({ items }: any) => {
+const SortableList = SortableContainer(({ items, removeListItem }: any) => {
   const classes = useStyles();
   return (
     <List className={classes.root}>
       {items.map((item: any, index: number) => (
-        <SortableItem key={`item-${item.place_id}`} index={index} item={item} />
+        <SortableItem
+          key={`item-${item.place_id}`}
+          index={index}
+          item={item}
+          removeListItem={removeListItem}
+        />
       ))}
     </List>
   );
@@ -56,16 +67,25 @@ class ListContainer extends Component<any, any> {
     this.setState(({ items }: any) => ({
       items: arrayMove(items, oldIndex, newIndex),
     }));
+    this.props.setItems(this.state.items);
   };
 
   render() {
     console.log(this.props);
+
     return (
-      <SortableList
-        distance={1}
-        items={this.state.items}
-        onSortEnd={this.onSortEnd}
-      />
+      <>
+        <SortableList
+          distance={1}
+          items={this.state.items}
+          onSortEnd={this.onSortEnd}
+          removeListItem={this.props.removeListItem}
+        />
+        <div>
+          <p>Trip length: {this.props.routeLength?.distance}</p>
+          <p>Estimated duration: {this.props.routeLength?.duration}</p>
+        </div>
+      </>
     );
   }
 }

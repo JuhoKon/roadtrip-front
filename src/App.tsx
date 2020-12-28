@@ -7,7 +7,10 @@ import SearchContainer from "./containers/SearchContainer";
 import MapContainer from "./containers/MapContainer";
 import ListContainer from "./containers/ListContainer";
 import Modal from "./containers/Modal";
-import { PlaceDetailResult, CalculateDirections } from "./functions/GoogleMaps";
+import {
+  PlaceDetailResult,
+  RetrievePlaceDetails,
+} from "./functions/GoogleMaps";
 import DirectionServiceProvider from "./components/Directions";
 import { LoadScript } from "@react-google-maps/api";
 import { useForceUpdate } from "./components/ForceUpdate";
@@ -17,16 +20,17 @@ type Center = {
   lng: number;
 };
 function App() {
+  const [routeLength, setRouteLength] = React.useState<any | undefined>(
+    undefined
+  );
+  const [loading, setLoading] = React.useState(false);
   const forceUpdate = useForceUpdate();
   const [listItems, setListItems] = React.useState<PlaceDetailResult[] | any[]>(
     []
   );
-  const [startLocation, setStartLocation] = React.useState<
-    PlaceDetailResult | undefined
-  >(undefined);
-  const [endLocation, setEndLocation] = React.useState<
-    PlaceDetailResult | undefined
-  >(undefined);
+  const [waypoints, setWaypoints] = React.useState<any[] | undefined>(
+    undefined
+  );
   const [directions, setDirections] = React.useState<
     google.maps.DirectionsResult | undefined
   >(undefined);
@@ -40,7 +44,6 @@ function App() {
       return;
     }
     listItems.unshift(value);
-
     setCenter(value?.geometry.location);
     setZoom(15);
   };
@@ -51,49 +54,60 @@ function App() {
       return;
     }
     listItems.push(value);
-
     setCenter(value?.geometry.location);
     setZoom(15);
   };
-  const addWayPoint = (item: any) => {
-    //get information about the place by getplacebyID?
-    // another thing, update the sortable list to also update the parent component as its only modifying only its state!
-    console.log("Hello");
-    listItems.splice(listItems.length - 1, 0, item); //second last
+  const addWayPoint = async (item: any) => {
+    const result = await RetrievePlaceDetails(item.place_id);
+    listItems.splice(listItems.length - 1, 0, result); //second last
     forceUpdate();
   };
-  const removeListItem = (item: any) => {
-    console.log(item);
+  const removeListItem = (place_id: any) => {
+    setListItems(
+      listItems.filter((item: any) => {
+        return item.place_id !== place_id;
+      })
+    );
   };
-  /*   const waypoints: google.maps.DirectionsWaypoint[] = [
-    {
-      location: {
-        placeId:
-          "EkRZdWthcsSxeXVydMOndSwgVHVya3VheiBUT0vEsCBLb251dGxhcsSxLCBZZW5pbWFoYWxsZS9BbmthcmEsIFR1cmtleSIuKiwKFAoSCS-XDrbIF9MUEapL8pEF-aeHEhQKEgm7_ePb2BfTFBFclxP5MimZ4g",
-      },
-    },
-    {
-      location: {
-        placeId: "ChIJozelNqR3jEYRiKcLSo-Jths",
-      },
-    },
-  ]; */
+  console.log(directions);
   return (
     <div className="App">
       <Nav />
       <div style={{ padding: 20 }}>
-        <LoadScript googleMapsApiKey="AIzaSyC9JS6BGxWFhmhzMNrOkUtymM_uM8tU_V4">
+        <LoadScript googleMapsApiKey="API">
           <Grid container spacing={3}>
             <Grid item xs={8}>
               <Button
                 variant="contained"
                 color="primary"
-                disabled={getDirection}
+                disabled={loading || listItems.length < 2}
                 onClick={() => {
+                  let waypoints = [];
+                  if (listItems.length > 2) {
+                    for (const item of listItems) {
+                      if (
+                        item !== listItems[0] &&
+                        item !== listItems[listItems.length - 1]
+                      ) {
+                        console.log(item);
+                        waypoints.push({
+                          location: {
+                            placeId: item.place_id,
+                          },
+                        });
+                      }
+                    }
+                  }
+                  if (waypoints.length > 0) {
+                    setWaypoints(waypoints);
+                  } else {
+                    setWaypoints(undefined);
+                  }
                   setDirections(undefined);
+                  setLoading(true);
                   setGetDirection(true);
                   setTimeout(() => {
-                    setGetDirection(false);
+                    setLoading(false);
                   }, 1000);
                 }}
               >
@@ -109,8 +123,21 @@ function App() {
                     placeId: listItems[listItems.length - 1].place_id,
                   }}
                   origin={{ placeId: listItems[0].place_id }}
-                  outputDirections={(directions) => setDirections(directions)}
-                  /*   waypoints={waypoints} */
+                  outputDirections={(directions) => {
+                    let totalDistance = 0;
+                    let totalDuration = 0;
+
+                    for (const leg of directions.routes[0].legs) {
+                      totalDuration = leg.duration.value + totalDuration;
+                      totalDistance = leg.distance.value + totalDistance;
+                    }
+                    setDirections(directions);
+                    setRouteLength({
+                      distance: Math.round(totalDistance / 1000) + "km",
+                      duration: secondsToHms(totalDuration),
+                    });
+                  }}
+                  waypoints={waypoints}
                 />
               )}
               <MapContainer
@@ -122,13 +149,30 @@ function App() {
               />
             </Grid>
             <Grid item xs={4}>
-              <ListContainer items={listItems ? listItems : []} />
+              <ListContainer
+                setItems={(items: any) => setListItems(items)}
+                items={listItems ? listItems : []}
+                removeListItem={removeListItem}
+                routeLength={routeLength}
+              />
             </Grid>
           </Grid>
         </LoadScript>
       </div>
     </div>
   );
+}
+//https://stackoverflow.com/questions/37096367/how-to-convert-seconds-to-minutes-and-hours-in-javascript
+function secondsToHms(seconds: any) {
+  seconds = Number(seconds);
+  var h = Math.floor(seconds / 3600);
+  var m = Math.floor((seconds % 3600) / 60);
+  var s = Math.floor((seconds % 3600) % 60);
+
+  var hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
+  var mDisplay = m > 0 ? m + (m === 1 ? " minute, " : " minutes, ") : "";
+  var sDisplay = s > 0 ? s + (s === 1 ? " second" : " seconds") : "";
+  return hDisplay + mDisplay + sDisplay;
 }
 
 export default App;
