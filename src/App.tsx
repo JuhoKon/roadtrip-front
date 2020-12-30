@@ -20,6 +20,10 @@ type Center = {
   lng: number;
 };
 function App() {
+  const [showError, setError] = React.useState(false);
+  const [waypointMarkerInfo, setWaypointMarkerInfo] = React.useState<
+    PlaceDetailResult[] | undefined
+  >(undefined);
   const [routeLength, setRouteLength] = React.useState<any | undefined>(
     undefined
   );
@@ -68,8 +72,36 @@ function App() {
         return item.place_id !== place_id;
       })
     );
+    forceUpdate();
   };
-  console.log(directions);
+  const calculateDirectionAndWaypoints = () => {
+    let waypoints = [];
+    if (listItems.length > 2) {
+      for (const item of listItems) {
+        if (item !== listItems[0] && item !== listItems[listItems.length - 1]) {
+          console.log(item);
+          waypoints.push({
+            location: {
+              placeId: item.place_id,
+            },
+          });
+        }
+      }
+    }
+    if (waypoints.length > 0) {
+      setWaypoints(waypoints);
+    } else {
+      setWaypoints(undefined);
+    }
+    setDirections(undefined);
+    setLoading(true);
+    setGetDirection(true);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+  console.log(waypointMarkerInfo);
   return (
     <div className="App">
       <Nav />
@@ -77,38 +109,13 @@ function App() {
         <LoadScript googleMapsApiKey="API">
           <Grid container spacing={3}>
             <Grid item xs={8}>
+              {showError ? <p>Error fetching directions. Try again!</p> : null}
               <Button
                 variant="contained"
                 color="primary"
                 disabled={loading || listItems.length < 2}
                 onClick={() => {
-                  let waypoints = [];
-                  if (listItems.length > 2) {
-                    for (const item of listItems) {
-                      if (
-                        item !== listItems[0] &&
-                        item !== listItems[listItems.length - 1]
-                      ) {
-                        console.log(item);
-                        waypoints.push({
-                          location: {
-                            placeId: item.place_id,
-                          },
-                        });
-                      }
-                    }
-                  }
-                  if (waypoints.length > 0) {
-                    setWaypoints(waypoints);
-                  } else {
-                    setWaypoints(undefined);
-                  }
-                  setDirections(undefined);
-                  setLoading(true);
-                  setGetDirection(true);
-                  setTimeout(() => {
-                    setLoading(false);
-                  }, 1000);
+                  calculateDirectionAndWaypoints();
                 }}
               >
                 Get route
@@ -123,7 +130,13 @@ function App() {
                     placeId: listItems[listItems.length - 1].place_id,
                   }}
                   origin={{ placeId: listItems[0].place_id }}
-                  outputDirections={(directions) => {
+                  outputDirections={async (directions: any) => {
+                    if (directions.status !== "OK") {
+                      setError(true);
+                      return;
+                    }
+                    setError(false);
+
                     let totalDistance = 0;
                     let totalDuration = 0;
 
@@ -136,6 +149,22 @@ function App() {
                       distance: Math.round(totalDistance / 1000) + "km",
                       duration: secondsToHms(totalDuration),
                     });
+
+                    // fetch placedetails for waypoints, to render seperately on the maps
+                    let promises = [];
+                    for (const waypoint of directions?.geocoded_waypoints) {
+                      const result = RetrievePlaceDetails(waypoint.place_id);
+                      promises.push(result);
+                    }
+                    const results = await Promise.all(promises);
+                    setWaypointMarkerInfo(results);
+
+                    //set alphabet for the waypoints, so we can render them on the list
+                    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                    for (let index = 0; index < listItems.length; index++) {
+                      const element = listItems[index];
+                      element["alphabet"] = alphabet[index];
+                    }
                   }}
                   waypoints={waypoints}
                 />
@@ -146,11 +175,14 @@ function App() {
                 directions={directions}
                 addWayPoint={addWayPoint}
                 removeListItem={removeListItem}
+                waypointMarkerInfo={waypointMarkerInfo}
               />
             </Grid>
             <Grid item xs={4}>
               <ListContainer
-                setItems={(items: any) => setListItems(items)}
+                setItems={(items: any) => {
+                  setListItems(items);
+                }}
                 items={listItems ? listItems : []}
                 removeListItem={removeListItem}
                 routeLength={routeLength}
@@ -176,3 +208,8 @@ function secondsToHms(seconds: any) {
 }
 
 export default App;
+
+//kuvien haku? https://developers.google.com/places/web-service/photos skippa?
+//kun valitaan paikka siihen markeri?
+// ne markerit kuntoon (iconeita?) + katan esimerkistä ne waypointti hommat
+// modali kuntoon, nappulat "oikeisiin paikkoihin"

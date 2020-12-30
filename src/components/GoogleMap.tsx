@@ -6,7 +6,11 @@ import {
   InfoWindow,
 } from "@react-google-maps/api";
 
-import { NearbySearch } from "../functions/GoogleMaps";
+import {
+  NearbySearch,
+  PlaceDetailResult,
+  RetrievePlaceDetails,
+} from "../functions/GoogleMaps";
 import { Button } from "@material-ui/core";
 
 var polyline = require("google-polyline");
@@ -16,12 +20,13 @@ const containerStyle = {
   width: "100%",
 };
 
-function MyComponent({
+function GoogleMaps({
   center,
   zoom,
   directions,
   addWayPoint,
   removeListItem,
+  waypointMarkerInfo,
 }: {
   center?: {
     lat: number;
@@ -31,6 +36,7 @@ function MyComponent({
   directions?: google.maps.DirectionsResult;
   addWayPoint: (item: any) => void;
   removeListItem: (item: any) => void;
+  waypointMarkerInfo?: PlaceDetailResult[];
 }) {
   const [markers, setMarkers] = React.useState<any | undefined>(undefined);
   const [map, setMap] = React.useState<any | null>(null);
@@ -75,6 +81,7 @@ function MyComponent({
       setMarkers(uniqueArray);
     }
   };
+  console.log(waypointMarkerInfo);
   return (
     <>
       <Button
@@ -114,19 +121,27 @@ function MyComponent({
             <DirectionsRenderer
               options={{
                 directions: directions,
+                polylineOptions: {
+                  strokeColor: "red",
+                },
+                suppressMarkers: true,
               }}
             />
           )}
+
           <Markers items={markers} addWayPoint={addWayPoint} />
+          <WayPointMarkers
+            items={waypointMarkerInfo}
+            addWayPoint={addWayPoint}
+          />
         </>
       </GoogleMap>
     </>
   );
 }
-const Stars = (stars: any) => {
-  console.log(stars);
-  if (typeof stars.stars === "undefined") return <></>;
-  const numberOfStars = Math.round(stars.stars);
+const Stars = (rating: any) => {
+  if (typeof rating.stars === "undefined") return <></>;
+  const numberOfStars = Math.round(rating.stars);
   console.log(numberOfStars);
   const goldenStar = (
     <span style={{ fontSize: "15px", color: "red" }}>&#9733;</span>
@@ -144,10 +159,52 @@ const Stars = (stars: any) => {
     </>
   );
 };
+const WayPointMarkers = ({ items, addWayPoint }: any) => {
+  const [selectedMarker, setSelectedMarker] = React.useState<any | undefined>(
+    undefined
+  );
+  let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return (
+    <>
+      {items &&
+        items.map((marker: any, index: number) => (
+          <Marker
+            key={marker.geometry.location.lat + marker.name}
+            position={marker.geometry.location}
+            onClick={() => {
+              setSelectedMarker(marker);
+            }}
+            label={{ text: alphabet[index], color: "white" }}
+            zIndex={5050}
+          />
+        ))}
+      {selectedMarker && (
+        <InfoWindow
+          onCloseClick={() => {
+            setSelectedMarker(null);
+          }}
+          position={{
+            lat: selectedMarker.geometry.location.lat + 0.0001,
+            lng: selectedMarker.geometry.location.lng,
+          }}
+        >
+          <div>
+            <h3 style={{ marginBottom: "2px" }}>{selectedMarker.name}</h3>
+            <Stars stars={selectedMarker.rating} />
+            <div></div>
+          </div>
+        </InfoWindow>
+      )}
+      )
+    </>
+  );
+};
 const Markers = ({ items, addWayPoint }: any) => {
   const [selectedMarker, setSelectedMarker] = React.useState<any | undefined>(
     undefined
   );
+
+  console.log(items);
   return (
     <>
       {items &&
@@ -191,4 +248,15 @@ const Markers = ({ items, addWayPoint }: any) => {
     </>
   );
 };
-export default React.memo(MyComponent);
+//tänne vertailua jos propsit on samat, niin ei piirrä uudestaan kaikesta turhuudesta
+//samalla kun painetaan get route, niin lasketaan listitemeille joku (A, B , C jne.
+//tunnus, niin nähdään ne "samalla tavalla kartalla"?)
+
+function checkIfPropsAreEqual(prevProps: any, nextProps: any) {
+  return (
+    prevProps.directions === nextProps.directions &&
+    prevProps.waypointMarkerInfo === nextProps.waypointMarkerInfo
+  );
+}
+
+export default React.memo(GoogleMaps, checkIfPropsAreEqual);

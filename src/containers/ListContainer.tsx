@@ -31,6 +31,10 @@ const SortableItem = SortableElement(({ item, removeListItem }: any) => (
     mapsURL={item.url}
     removeListItem={removeListItem}
     place_id={item.place_id}
+    alphabet={item.alphabet}
+    rating={item.rating}
+    types={item.types}
+    photos={item.photos}
   />
 ));
 
