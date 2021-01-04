@@ -2,8 +2,8 @@ import React from "react";
 import Nav from "./components/Nav";
 import "./App.css";
 import { Button, Grid } from "@material-ui/core";
-import SearchContainer from "./containers/SearchContainer2";
-import MapContainer from "./containers/MapContainer";
+import SearchContainer from "./containers/LocationSearch";
+import GoogleMaps from "./containers/GoogleMaps/GoogleMap";
 import ListContainer from "./containers/ListContainer";
 import StartModal from "./containers/StartModal";
 import SettingsModal from "./containers/SettingsModal";
@@ -11,13 +11,17 @@ import {
   NearbySearch,
   PlaceDetailResult,
   RetrievePlaceDetails,
-} from "./functions/GoogleMaps";
+} from "./functions/API";
 import DirectionServiceProvider from "./components/Directions";
 import { LoadScript } from "@react-google-maps/api";
 import { useForceUpdate } from "./components/ForceUpdate";
-import { distanceInKmBetweenEarthCoordinates } from "./functions/Helpers";
+import {
+  distanceInKmBetweenEarthCoordinates,
+  secondsToHms,
+} from "./functions/Helpers";
 import { ALPHABET } from "./other/Constants";
 var polyline = require("google-polyline");
+const { REACT_APP_API_KEY } = process.env;
 type Center = {
   lat: number;
   lng: number;
@@ -129,12 +133,11 @@ function App() {
       setError(true);
       return;
     }
-
     setError(false);
 
     let totalDistance = 0;
     let totalDuration = 0;
-
+    //get total distance and duration
     for (const leg of directions.routes[0].legs) {
       totalDuration = leg.duration.value + totalDuration;
       totalDistance = leg.distance.value + totalDistance;
@@ -155,7 +158,6 @@ function App() {
     setWaypointMarkerInfo(results);
 
     //set alphabet for the waypoints, so we can render them on the list
-
     for (let index = 0; index < listItems.length; index++) {
       const element = listItems[index];
       element["alphabet"] = ALPHABET[index];
@@ -260,11 +262,16 @@ function App() {
     if (directions && listItems.length > 1) return true;
     return false;
   };
+
   return (
     <div className="App">
       <Nav />
       <div style={{ padding: 20 }}>
-        <LoadScript googleMapsApiKey="API">
+        <LoadScript
+          googleMapsApiKey={
+            window.REACT_APP_API_KEY ? window.REACT_APP_API_KEY : "API"
+          }
+        >
           <Grid container spacing={3}>
             <Grid item xs={8}>
               {showError ? <p>Error fetching directions. Try again!</p> : null}
@@ -274,16 +281,27 @@ function App() {
                   justifyContent: "space-evenly",
                 }}
               >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={listItems.length < 2 || !shouldCalculateRouteAgain}
-                  onClick={() => {
-                    calculateDirectionAndWaypoints();
-                  }}
+                <div
+                  id={
+                    shouldCalculateRouteAgain && listItems.length > 1
+                      ? "bounce"
+                      : ""
+                  }
                 >
-                  Calculate route
-                </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={
+                      listItems.length < 2 || !shouldCalculateRouteAgain
+                    }
+                    onClick={() => {
+                      calculateDirectionAndWaypoints();
+                    }}
+                  >
+                    Calculate route
+                  </Button>
+                </div>
+
                 <SettingsModal
                   canWeShowSettings={canWeShowSettings()}
                   handleClose={() => setShowSettings(false)}
@@ -352,7 +370,7 @@ function App() {
                   createWayPointFromSearch(location);
                 }}
               />
-              <MapContainer
+              <GoogleMaps
                 center={center}
                 zoom={zoom}
                 directions={directions}
@@ -378,25 +396,4 @@ function App() {
     </div>
   );
 }
-//https://stackoverflow.com/questions/37096367/how-to-convert-seconds-to-minutes-and-hours-in-javascript
-function secondsToHms(seconds: any) {
-  seconds = Number(seconds);
-  var h = Math.floor(seconds / 3600);
-  var m = Math.floor((seconds % 3600) / 60);
-  var s = Math.floor((seconds % 3600) % 60);
-
-  var hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m === 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s === 1 ? " second" : " seconds") : "";
-  return hDisplay + mDisplay + sDisplay;
-}
-
 export default App;
-
-//kuvien haku? https://developers.google.com/places/web-service/photos skippa?
-//kun valitaan paikka siihen markeri?
-// ne markerit kuntoon (iconeita?) + katan esimerkistä ne waypointti hommat
-// modali kuntoon, nappulat "oikeisiin paikkoihin"
-// mahdollisuus asettaa paikka "nukkumapaikaksi" => muuttaa vaikka markerin värin tms.
-// => näkyy myös listalla
-//ja joku juttu, että ei voi laittaa samaa paikkaa kahta kertaa, esim alertti että nope

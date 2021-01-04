@@ -1,6 +1,6 @@
 import React from "react";
 import SearchField from "../components/AsynchronousField";
-import { PlaceDetailResult } from "../functions/GoogleMaps";
+import { PlaceDetailResult } from "../functions/API";
 
 const SearchContainer = ({
   setLocation,

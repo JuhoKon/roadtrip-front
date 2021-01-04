@@ -6,7 +6,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import SearchContainer from "./SearchContainer";
-import { PlaceDetailResult } from "../functions/GoogleMaps";
+import { PlaceDetailResult } from "../functions/API";
 
 const Modal = ({
   setStartLocation,

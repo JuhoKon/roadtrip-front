@@ -1,6 +1,13 @@
 import axios from "axios";
+let API = "";
 
-const API = "http://localhost:8080/api";
+if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+  console.log("Development");
+  API = "http://localhost:8080/api";
+} else {
+  console.log("Prod");
+  API = "/api";
+}
 
 type Type = "route" | "geocode" | "locality" | "political";
 type Photo = {

@@ -125,8 +125,9 @@ const Badges = (types: any) => {
   const items = getTypeNames(types.types);
   return (
     <>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Chip
+          key={index}
           label={item}
           style={{
             background: getColor(item),

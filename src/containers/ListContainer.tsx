@@ -85,7 +85,7 @@ class ListContainer extends Component<any, any> {
               onSortEnd={this.onSortEnd}
               removeListItem={this.props.removeListItem}
             />
-            {this.props.routeLength && (
+            {this.props.routeLength && this.props.items.length > 1 && (
               <div>
                 <p>Trip length: {this.props.routeLength?.distance}</p>
                 <p>Estimated duration: {this.props.routeLength?.duration}</p>

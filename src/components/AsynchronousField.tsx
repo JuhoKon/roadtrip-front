@@ -7,7 +7,7 @@ import {
   AutoCompleteResult,
   RetrievePlaceDetails,
   PlaceDetailResult,
-} from "../functions/GoogleMaps";
+} from "../functions/API";
 import { InputLabel } from "@material-ui/core";
 
 const debounce = require("lodash.debounce");
