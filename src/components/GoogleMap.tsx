@@ -4,16 +4,28 @@ import {
   GoogleMap,
   Marker,
   InfoWindow,
+  MarkerClusterer,
 } from "@react-google-maps/api";
 
 import {
-  NearbySearch,
   PlaceDetailResult,
   RetrievePlaceDetails,
 } from "../functions/GoogleMaps";
-import { Button } from "@material-ui/core";
 
-var polyline = require("google-polyline");
+import InfoWindowItem from "./InfoWindowItem";
+
+import gas_station from "../assets/gas-pump.png";
+import gps from "../assets/gps.png";
+import coffee from "../assets/coffee.png";
+import mall from "../assets/mall.png";
+import point_of_interest from "../assets/point-of-interest.png";
+import restaurant from "../assets/restaurant.png";
+import shops from "../assets/shops.png";
+import spa from "../assets/spa.png";
+import hotel from "../assets/hotel.png";
+import park from "../assets/park.png";
+import bar from "../assets/bar.png";
+import { ALPHABET, PLACETYPES } from "../other/Constants";
 
 const containerStyle = {
   height: "70vh",
@@ -25,8 +37,8 @@ function GoogleMaps({
   zoom,
   directions,
   addWayPoint,
-  removeListItem,
   waypointMarkerInfo,
+  markers,
 }: {
   center?: {
     lat: number;
@@ -35,73 +47,11 @@ function GoogleMaps({
   zoom?: number;
   directions?: google.maps.DirectionsResult;
   addWayPoint: (item: any) => void;
-  removeListItem: (item: any) => void;
   waypointMarkerInfo?: PlaceDetailResult[];
+  markers?: any;
 }) {
-  const [markers, setMarkers] = React.useState<any | undefined>(undefined);
-  const [map, setMap] = React.useState<any | null>(null);
-
-  const onLoad = React.useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds();
-    map.fitBounds(bounds);
-    setMap(map);
-  }, []);
-
-  const onUnmount = React.useCallback(function callback(map) {
-    setMap(null);
-  }, []);
-
-  const getNearbyStuff = async () => {
-    let results: any[] = [];
-    let waypoints = [];
-    if (directions && map !== null) {
-      waypoints = polyline.decode(directions.routes[0].overview_polyline);
-      let promises = [];
-      for (let i = 0; i < waypoints.length; i += 40) {
-        const promise = NearbySearch({
-          location: {
-            lat: waypoints[i][0],
-            lng: waypoints[i][1],
-          },
-          radius: 20000,
-          type: "restaurant",
-        });
-        promises.push(promise);
-      }
-      const searchResults = await Promise.all(promises);
-      for (const res of searchResults) {
-        results = res.results.concat(results);
-      }
-      const uniqueArray = results.filter((obj: any, pos: any, arr: any) => {
-        return (
-          arr.map((mapObj: any) => mapObj.place_id).indexOf(obj.place_id) ===
-          pos
-        );
-      });
-      setMarkers(uniqueArray);
-    }
-  };
-  console.log(waypointMarkerInfo);
   return (
     <>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          getNearbyStuff();
-        }}
-      >
-        Get stuff
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setMarkers(undefined);
-        }}
-      >
-        Clear markers
-      </Button>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={
@@ -113,22 +63,9 @@ function GoogleMaps({
               }
         }
         zoom={zoom ? zoom : 14}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
       >
         <>
-          {directions && (
-            <DirectionsRenderer
-              options={{
-                directions: directions,
-                polylineOptions: {
-                  strokeColor: "red",
-                },
-                suppressMarkers: true,
-              }}
-            />
-          )}
-
+          {directions && <DirectionsMemo directions={directions} />}
           <Markers items={markers} addWayPoint={addWayPoint} />
           <WayPointMarkers
             items={waypointMarkerInfo}
@@ -139,31 +76,25 @@ function GoogleMaps({
     </>
   );
 }
-const Stars = (rating: any) => {
-  if (typeof rating.stars === "undefined") return <></>;
-  const numberOfStars = Math.round(rating.stars);
-  console.log(numberOfStars);
-  const goldenStar = (
-    <span style={{ fontSize: "15px", color: "red" }}>&#9733;</span>
-  );
-  const greyStar = (
-    <span style={{ fontSize: "15px", color: "black" }}>&#9733;</span>
-  );
+const DirectionsRender = ({ directions }: any) => {
   return (
-    <>
-      {numberOfStars > 0 ? goldenStar : greyStar}
-      {numberOfStars > 1 ? goldenStar : greyStar}
-      {numberOfStars > 2 ? goldenStar : greyStar}
-      {numberOfStars > 3 ? goldenStar : greyStar}
-      {numberOfStars > 4 ? goldenStar : greyStar}
-    </>
+    <DirectionsRenderer
+      options={{
+        directions: directions,
+        polylineOptions: {
+          strokeColor: "red",
+        },
+        suppressMarkers: true,
+      }}
+    />
   );
 };
+const DirectionsMemo = React.memo(DirectionsRender, checkIfPropsAreEqual2);
+
 const WayPointMarkers = ({ items, addWayPoint }: any) => {
   const [selectedMarker, setSelectedMarker] = React.useState<any | undefined>(
     undefined
   );
-  let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return (
     <>
       {items &&
@@ -174,7 +105,7 @@ const WayPointMarkers = ({ items, addWayPoint }: any) => {
             onClick={() => {
               setSelectedMarker(marker);
             }}
-            label={{ text: alphabet[index], color: "white" }}
+            label={{ text: ALPHABET[index], color: "white" }}
             zIndex={5050}
           />
         ))}
@@ -188,35 +119,100 @@ const WayPointMarkers = ({ items, addWayPoint }: any) => {
             lng: selectedMarker.geometry.location.lng,
           }}
         >
-          <div>
-            <h3 style={{ marginBottom: "2px" }}>{selectedMarker.name}</h3>
-            <Stars stars={selectedMarker.rating} />
-            <div></div>
-          </div>
+          <InfoWindowItem
+            name={selectedMarker.name}
+            adr_address={selectedMarker.adr_address}
+            url={selectedMarker.website}
+            mapsURL={selectedMarker.url}
+            place_id={selectedMarker.place_id}
+            alphabet={selectedMarker.alphabet}
+            rating={selectedMarker.rating}
+            types={selectedMarker.types}
+            photos={selectedMarker.photos}
+            addMarker={() => addWayPoint(selectedMarker)}
+            showWayPointButton={false}
+          />
         </InfoWindow>
       )}
       )
     </>
   );
 };
+const getIcon = (types: any[]) => {
+  let item;
+  for (let i = 0; i < PLACETYPES.length; i++) {
+    if (types.includes(PLACETYPES[i])) {
+      item = PLACETYPES[i];
+      break;
+    }
+  }
+  if (item) {
+    switch (item) {
+      case "gas_station":
+        return gas_station;
+      case "shopping_mall":
+        return mall;
+      case "cafe":
+        return coffee;
+      case "store":
+        return shops;
+      case "point_of_interest":
+        return point_of_interest;
+      case "restaurant":
+        return restaurant;
+      case "spa":
+        return spa;
+      case "lodging":
+        return hotel;
+      case "park":
+        return park;
+      case "food":
+        return restaurant;
+      case "bar":
+        return bar;
+      default:
+        return gps;
+    }
+  }
+  return gps;
+};
 const Markers = ({ items, addWayPoint }: any) => {
+  const options = {
+    imagePath:
+      "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m",
+    minimumClusterSize: 5,
+  };
+
   const [selectedMarker, setSelectedMarker] = React.useState<any | undefined>(
     undefined
   );
-
-  console.log(items);
+  const [loading, setLoading] = React.useState(false);
   return (
     <>
-      {items &&
-        items.map((marker: any) => (
-          <Marker
-            key={marker.geometry.location.lat + marker.name}
-            position={marker.geometry.location}
-            onClick={() => {
-              setSelectedMarker(marker);
-            }}
-          />
-        ))}
+      {items && (
+        <MarkerClusterer options={options}>
+          {(clusterer) =>
+            items.map((marker: any) => (
+              <Marker
+                key={marker.place_id}
+                position={marker.geometry.location}
+                onClick={async () => {
+                  setLoading(true);
+                  setSelectedMarker(marker);
+                  const result = await RetrievePlaceDetails(marker.place_id);
+                  setLoading(false);
+                  setSelectedMarker(result);
+                }}
+                clusterer={clusterer}
+                icon={{
+                  url: getIcon(marker.types),
+                  origin: new google.maps.Point(0, 0),
+                }}
+              />
+            ))
+          }
+        </MarkerClusterer>
+      )}
       {selectedMarker && (
         <InfoWindow
           onCloseClick={() => {
@@ -227,36 +223,38 @@ const Markers = ({ items, addWayPoint }: any) => {
             lng: selectedMarker.geometry.location.lng,
           }}
         >
-          <div>
-            <h3 style={{ marginBottom: "2px" }}>{selectedMarker.name}</h3>
-            <Stars stars={selectedMarker.rating} />
-            <div>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  addWayPoint(selectedMarker);
-                }}
-              >
-                Add waypoint
-              </Button>
-            </div>
-          </div>
+          <InfoWindowItem
+            name={selectedMarker.name}
+            adr_address={selectedMarker.adr_address}
+            url={selectedMarker.website}
+            mapsURL={selectedMarker.url}
+            place_id={selectedMarker.place_id}
+            alphabet={selectedMarker.alphabet}
+            rating={selectedMarker.rating}
+            types={selectedMarker.types}
+            photos={selectedMarker.photos}
+            addMarker={() => addWayPoint(selectedMarker)}
+            showWayPointButton={true}
+            loading={loading}
+          />
         </InfoWindow>
       )}
       )
     </>
   );
 };
-//tänne vertailua jos propsit on samat, niin ei piirrä uudestaan kaikesta turhuudesta
-//samalla kun painetaan get route, niin lasketaan listitemeille joku (A, B , C jne.
-//tunnus, niin nähdään ne "samalla tavalla kartalla"?)
 
 function checkIfPropsAreEqual(prevProps: any, nextProps: any) {
   return (
     prevProps.directions === nextProps.directions &&
-    prevProps.waypointMarkerInfo === nextProps.waypointMarkerInfo
+    prevProps.waypointMarkerInfo === nextProps.waypointMarkerInfo &&
+    prevProps.markers === nextProps.markers &&
+    prevProps.zoom === nextProps.zoom &&
+    prevProps.center === nextProps.center
   );
 }
 
+function checkIfPropsAreEqual2(prevProps: any, nextProps: any) {
+  return prevProps.directions === nextProps.directions;
+}
 export default React.memo(GoogleMaps, checkIfPropsAreEqual);

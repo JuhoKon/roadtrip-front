@@ -1,6 +1,5 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -12,11 +11,19 @@ import { PlaceDetailResult } from "../functions/GoogleMaps";
 const Modal = ({
   setStartLocation,
   setEndLocation,
+  showModal,
+  calculateDirectionAndWaypoints,
+  showSettings,
+  startOver,
 }: {
   setStartLocation: (value: PlaceDetailResult | undefined) => void;
   setEndLocation: (value: PlaceDetailResult | undefined) => void;
+  showModal: boolean;
+  calculateDirectionAndWaypoints: () => void;
+  showSettings: () => void;
+  startOver: () => void;
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(showModal);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -28,8 +35,15 @@ const Modal = ({
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-        Open form dialog
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          handleClickOpen();
+          startOver();
+        }}
+      >
+        Start over
       </Button>
       <Dialog
         open={open}
@@ -53,7 +67,14 @@ const Modal = ({
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button
+            onClick={() => {
+              calculateDirectionAndWaypoints();
+              handleClose();
+              showSettings();
+            }}
+            color="primary"
+          >
             Next step
           </Button>
         </DialogActions>

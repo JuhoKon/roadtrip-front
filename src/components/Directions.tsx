@@ -19,7 +19,6 @@ const DirectionServiceProvider = ({
   outputDirections: (value: google.maps.DirectionsResult) => void;
   waypoints?: google.maps.DirectionsWaypoint[];
 }) => {
-  console.log(destination, origin);
   return (
     <DirectionsService
       // required
@@ -31,23 +30,12 @@ const DirectionServiceProvider = ({
       }}
       // required
       callback={(result) => {
-        console.log(result);
         outputDirections(result);
       }}
       // optional
-      onLoad={(directionsService: any) => {
-        console.log(
-          "DirectionsService onLoad directionsService: ",
-          directionsService
-        );
-      }}
+      onLoad={(directionsService: any) => {}}
       // optional
-      onUnmount={(directionsService: any) => {
-        console.log(
-          "DirectionsService onUnmount directionsService: ",
-          directionsService
-        );
-      }}
+      onUnmount={(directionsService: any) => {}}
     />
   );
 };

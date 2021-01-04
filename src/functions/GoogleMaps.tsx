@@ -88,7 +88,7 @@ export const CalculateDirections = async (
   newRequest.routes[0].bounds = bounds;
   newRequest.routes[0].overview_polyline =
     newRequest.routes[0].overview_polyline.points;
-  console.log(newRequest);
+
   return newRequest;
 };
 
@@ -96,16 +96,18 @@ export const NearbySearch = async ({
   location,
   radius,
   type,
+  keyword,
 }: {
   location: { lat: any; lng: any };
   radius: number;
-  type: string;
+  type?: string;
+  keyword?: string;
 }) => {
   const res = await axios.post(API + `/nearbysearch`, {
     location,
     radius,
     type,
+    keyword,
   });
-
   return res.data.data;
 };

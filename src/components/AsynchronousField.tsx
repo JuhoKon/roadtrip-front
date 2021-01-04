@@ -39,10 +39,9 @@ export default function Asynchronous({
         return;
       }
       const data = await GoogleMapsAutoComplete(nextValue);
-      console.log(data);
       setOptions(data);
       setLoading(false);
-    }, 1000),
+    }, 140),
     []
   );
 

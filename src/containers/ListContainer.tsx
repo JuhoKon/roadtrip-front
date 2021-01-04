@@ -75,20 +75,30 @@ class ListContainer extends Component<any, any> {
   };
 
   render() {
-    console.log(this.props);
-
     return (
       <>
-        <SortableList
-          distance={1}
-          items={this.state.items}
-          onSortEnd={this.onSortEnd}
-          removeListItem={this.props.removeListItem}
-        />
-        <div>
-          <p>Trip length: {this.props.routeLength?.distance}</p>
-          <p>Estimated duration: {this.props.routeLength?.duration}</p>
-        </div>
+        {this.props.items.length > 0 ? (
+          <>
+            <SortableList
+              distance={1}
+              items={this.state.items}
+              onSortEnd={this.onSortEnd}
+              removeListItem={this.props.removeListItem}
+            />
+            {this.props.routeLength && (
+              <div>
+                <p>Trip length: {this.props.routeLength?.distance}</p>
+                <p>Estimated duration: {this.props.routeLength?.duration}</p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div>
+            Welcome to Roadtrip Planner! Start by either searching for locations
+            from the field above Google Maps or by clicking the "Start Over" -
+            button!
+          </div>
+        )}
       </>
     );
   }

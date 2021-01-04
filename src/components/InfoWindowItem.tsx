@@ -1,18 +1,14 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Chip } from "@material-ui/core";
+import { PLACETYPES } from "../other/Constants";
 
 const useStyles = makeStyles({
   root: {
-    maxWidth: 500,
-    background: "#e0e0e0b3",
+    maxWidth: 400,
     marginBottom: 5,
-    cursor: "pointer",
     position: "relative",
     textAlign: "center",
   },
@@ -30,116 +26,67 @@ export default function ListItem({
   adr_address,
   url,
   mapsURL,
-  removeListItem,
+  addMarker,
   place_id,
   alphabet,
   rating,
   types,
   photos,
+  showWayPointButton,
+  loading,
 }: {
   name: string;
   adr_address: string;
   url: string;
   mapsURL: string;
-  removeListItem: (item: any) => void;
+  addMarker: () => void;
   place_id: string;
   alphabet?: string;
   rating: any;
   types: string[];
   photos: any;
+  showWayPointButton: boolean;
+  loading?: boolean;
 }) {
   const classes = useStyles();
   return (
-    <Card className={classes.root}>
-      <CardContent>
+    <div className={classes.root}>
+      <div>
         <Typography gutterBottom variant="h5" style={{ marginBottom: "0px" }}>
           {name}
         </Typography>
-        {alphabet ? (
-          <div
-            style={{
-              position: "absolute",
-              top: "10px",
-              left: "10px",
-              background: "red",
-              color: "white",
-              borderRadius: "50%",
-              height: "40px",
-              width: "40px",
-              alignSelf: "center",
-              textAlign: "center",
-              verticalAlign: "middle",
-              lineHeight: "40px",
-            }}
-          >
-            {alphabet}
-          </div>
-        ) : null}
-
-        <Button
-          onClick={() => {
-            removeListItem(place_id);
-          }}
-          style={{
-            position: "absolute",
-            color: "red",
-            top: "25px",
-            right: "0px",
-          }}
-        >
-          x
-        </Button>
-
-        {/*           <Typography variant="body2" color="textSecondary" component="p">
-            Lizards are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
-          </Typography> */}
-      </CardContent>
-
+      </div>
       <div dangerouslySetInnerHTML={{ __html: adr_address }} />
-
       <Stars rating={rating} />
       <Badges types={types} />
-      <CardActions style={{ zIndex: 10 }}>
+      <div style={{ zIndex: 10 }}>
+        <br />
         <Button
+          style={{ marginRight: 25 }}
+          variant="contained"
           disabled={!url}
           size="small"
           color="primary"
           href={url}
           target="_blank"
         >
-          Learn More
+          {loading ? "Loading..." : "Learn More"}
         </Button>
+
         <Button
-          disabled={!mapsURL}
+          disabled={!showWayPointButton}
+          style={{ marginLeft: 25 }}
+          variant="contained"
+          onClick={() => addMarker()}
           size="small"
           color="primary"
-          href={mapsURL}
-          target="_blank"
         >
-          Google Maps
+          Add waypoint
         </Button>
-      </CardActions>
-    </Card>
+      </div>
+    </div>
   );
 }
-const wantedItems = [
-  "gas_station",
-  "liquor_store",
-  "park",
-  "parking",
-  "restaurant",
-  "food",
-  "spa",
-  "store",
-  "point_of_interest",
-  "bar",
-  "atm",
-  "lodging",
-  "shopping_mall",
-  "cafe",
-];
-
 const getColor = (type: string) => {
   switch (type) {
     case "GAS STATION":
@@ -213,8 +160,7 @@ const Stars = (rating: any) => {
 };
 const getTypeNames = (items: any): string[] => {
   let array = [];
-
-  let res = items.filter((item: any) => wantedItems.includes(item));
+  let res = items.filter((item: any) => PLACETYPES.includes(item));
 
   for (let item of res) {
     item = item.toUpperCase();
