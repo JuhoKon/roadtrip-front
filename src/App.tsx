@@ -277,9 +277,10 @@ function App() {
       <Nav />
       <div style={{ padding: 20 }}>
         <LoadScript
-          googleMapsApiKey={
+          /*         googleMapsApiKey={
             window.REACT_APP_API_KEY ? window.REACT_APP_API_KEY : "API"
-          }
+          } */
+          googleMapsApiKey={"AIzaSyAMTyAeraWU_WFtLGvVc6CO3YuVsq-Wg40"}
         >
           <Grid container spacing={3}>
             <Grid item xs={8}>

@@ -64,7 +64,16 @@ export default function ListItem({
   return (
     <div className={classes.root}>
       <div>
-        <Typography gutterBottom variant="h5" style={{ marginBottom: "0px" }}>
+        <Typography
+          gutterBottom
+          variant="h5"
+          style={{ marginBottom: "0px", cursor: "pointer" }}
+          onClick={() => {
+            window.open(
+              `https://www.google.com/maps/place/?q=place_id:${place_id}`
+            );
+          }}
+        >
           {name}
         </Typography>
       </div>
