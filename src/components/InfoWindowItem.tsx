@@ -2,8 +2,9 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { Chip } from "@material-ui/core";
+import { Chip, CircularProgress } from "@material-ui/core";
 import { PLACETYPES } from "../other/Constants";
+import { GetPhoto } from "../functions/API";
 
 const useStyles = makeStyles({
   root: {
@@ -14,10 +15,6 @@ const useStyles = makeStyles({
   },
   media: {
     height: 140,
-  },
-  customBadge: {
-    backgroundColor: "#00AFD7",
-    color: "white",
   },
 });
 
@@ -48,7 +45,22 @@ export default function ListItem({
   showWayPointButton: boolean;
   loading?: boolean;
 }) {
+  console.log(photos);
   const classes = useStyles();
+  const [photo, setPhoto] = React.useState<any | undefined>(undefined);
+  const [loadingPhoto, setLoadingPhoto] = React.useState(false);
+  React.useEffect(() => {
+    const GetPhotos = async () => {
+      if (!photos) {
+        return;
+      }
+      setLoadingPhoto(true);
+      const result = await GetPhoto({ photoId: photos[0].photo_reference });
+      setLoadingPhoto(false);
+      setPhoto(result);
+    };
+    GetPhotos();
+  }, [photos]);
   return (
     <div className={classes.root}>
       <div>
@@ -60,6 +72,16 @@ export default function ListItem({
       <Stars rating={rating} />
       <Badges types={types} />
       <div style={{ zIndex: 10 }}>
+        <br />
+        {loadingPhoto ? (
+          <div>
+            <CircularProgress />
+          </div>
+        ) : null}
+        {photos && !loadingPhoto ? (
+          <img src={photo} alt="point of interest" width="200"></img>
+        ) : null}
+        <br />
         <br />
         <Button
           style={{ marginRight: 25 }}
@@ -90,35 +112,35 @@ export default function ListItem({
 const getColor = (type: string) => {
   switch (type) {
     case "GAS STATION":
-      return "green";
+      return "#242f40";
     case "LIQUOR STORE":
-      return "blue";
+      return "#5dd39e";
     case "PARK":
-      return "orange";
+      return "#348aa7";
     case "PARKING":
-      return "green";
+      return "#525174";
     case "RESTAURANT":
-      return "blue";
+      return "#513b56";
     case "FOOD":
-      return "purple";
+      return "#242f40";
     case "SPA":
-      return "purple";
+      return "#5dd39e";
     case "STORE":
-      return "green";
+      return "#348aa7";
     case "POINT OF INTEREST":
-      return "blue";
+      return "#525174";
     case "BAR":
-      return "green";
+      return "#513b56";
     case "ATM":
-      return "blue";
+      return "#525174";
     case "LODGING":
       return "orange";
     case "SHOPPING MALL":
       return "purple";
     case "CAFE":
-      return "green";
+      return "#513b56";
     default:
-      return "red";
+      return "#242f40";
   }
 };
 const Badges = (types: any) => {
@@ -165,7 +187,7 @@ const getTypeNames = (items: any): string[] => {
 
   for (let item of res) {
     item = item.toUpperCase();
-    item = item.replaceAll("_", " ");
+    item = item.split("_").join(" ");
     array.push(item);
   }
   return array;

@@ -118,3 +118,9 @@ export const NearbySearch = async ({
   });
   return res.data.data;
 };
+export const GetPhoto = async ({ photoId }: { photoId: string }) => {
+  const res = await axios.post(API + `/getphoto`, {
+    photoId,
+  });
+  return res.data.url;
+};

@@ -7,6 +7,14 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import SearchContainer from "./SearchContainer";
 import { PlaceDetailResult } from "../functions/API";
+import RoadTripImage from "../assets/roadtrip.jpg";
+import { CardMedia, makeStyles, Typography } from "@material-ui/core";
+
+const useStyles = makeStyles({
+  media: {
+    height: 200,
+  },
+});
 
 const Modal = ({
   setStartLocation,
@@ -32,7 +40,7 @@ const Modal = ({
   const handleClose = () => {
     setOpen(false);
   };
-
+  const classes = useStyles();
   return (
     <div>
       <Button
@@ -50,13 +58,24 @@ const Modal = ({
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">Roadtrip planner</DialogTitle>
+        <div style={{ position: "relative", marginBottom: "20px" }}>
+          <CardMedia
+            className={classes.media}
+            image={RoadTripImage}
+            title="Roadtrip"
+          />
+          <h2 style={{ position: "absolute", top: "20%", left: "30%" }}>
+            Roadtrip Planner
+          </h2>
+        </div>
+
         <DialogContent>
-          <DialogContentText>
+          <Typography variant="body1">
             Welcome to Roadtrip planner! As the name states, this is a planner
-            for roadtrips. Start by choosing a starting location and the
-            destination with the forms below.
-          </DialogContentText>
+            for creating roadtrips. Start by choosing a starting location and
+            the destination with the forms below.
+          </Typography>
+
           <br />
           <SearchContainer
             setStartLocation={setStartLocation}

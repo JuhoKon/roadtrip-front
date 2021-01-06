@@ -1,11 +1,12 @@
 import React from "react";
 import { GoogleMap } from "@react-google-maps/api";
 
-import { PlaceDetailResult } from "../../functions/API";
+import { PlaceDetailResult, RetrievePlaceDetails } from "../../functions/API";
 
 import DirectionsMemo from "./components/DirectionsRenderer";
 import WayPointMarkers from "./components/WaypointMakers";
 import Markers from "./components/Markers";
+import InfoWindowHandler from "./components/InfoWindowHandler";
 
 const containerStyle = {
   height: "70vh",
@@ -30,19 +31,29 @@ function GoogleMaps({
   waypointMarkerInfo?: PlaceDetailResult[];
   markers?: any;
 }) {
+  const [result, setResult] = React.useState<any | undefined>(undefined);
+  //refi google mapsiin täällä
+  //click listeneri, tai onClick homma
+  //katotaan onko eventillä placeID, jos on
+  // näytetään oma infowindow?
+  // pitäis olla ez pz?
+  // ehkä oma memo sille, jos tää alkaa sekoilla
+  const handleClick = async (event: any) => {
+    console.log(event);
+    if (event.placeId) {
+      // Have clicked on a point of interest (marker on default google maps)
+      event.stop(); // Stop the default infowindow from showing
+      const result = await RetrievePlaceDetails(event.placeId);
+      setResult(result);
+    }
+  };
   return (
     <>
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={
-          center
-            ? center
-            : {
-                lat: 61.05499289999999,
-                lng: 28.1896628,
-              }
-        }
+        center={center}
         zoom={zoom ? zoom : 14}
+        onClick={(e) => handleClick(e)}
       >
         <>
           {directions && <DirectionsMemo directions={directions} />}
@@ -51,6 +62,7 @@ function GoogleMaps({
             items={waypointMarkerInfo}
             addWayPoint={addWayPoint}
           />
+          <InfoWindowHandler marker={result} addWayPoint={addWayPoint} />
         </>
       </GoogleMap>
     </>
@@ -63,7 +75,8 @@ function checkIfPropsAreEqual(prevProps: any, nextProps: any) {
     prevProps.waypointMarkerInfo === nextProps.waypointMarkerInfo &&
     prevProps.markers === nextProps.markers &&
     prevProps.zoom === nextProps.zoom &&
-    prevProps.center === nextProps.center
+    prevProps.center === nextProps.center &&
+    prevProps.addWayPoint === nextProps.addWayPoint
   );
 }
 

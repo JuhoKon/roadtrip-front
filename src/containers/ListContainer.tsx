@@ -9,10 +9,11 @@ const useStyles = makeStyles((theme: any) => ({
   root: {
     width: "100%",
     maxWidth: 500,
-    backgroundColor: theme.palette.background.paper,
     position: "relative",
     overflow: "auto",
-    maxHeight: 800,
+    maxHeight: 720,
+    padding: 0,
+    border: "1px solid #3f51b53b",
   },
   listSection: {
     backgroundColor: "inherit",
@@ -75,6 +76,7 @@ class ListContainer extends Component<any, any> {
   };
 
   render() {
+    console.log(this.props.items);
     return (
       <>
         {this.props.items.length > 0 ? (

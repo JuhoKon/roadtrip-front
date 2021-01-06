@@ -13,6 +13,7 @@ import {
   RadioGroup,
   TextField,
   CircularProgress,
+  Typography,
 } from "@material-ui/core";
 
 const Modal = ({
@@ -62,16 +63,18 @@ const Modal = ({
           Search for places along the route
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <Typography variant="body1">
             Here you can choose what kind of activities you want to search from
             the map! Everything here is <strong>optional</strong>, if you don't
             want to specify anything, just click the <strong>Search</strong> -
             button!
-          </DialogContentText>
-          <DialogContentText>
+          </Typography>
+          <br />
+          <Typography variant="body2">
             Note: The <strong>Show me everything</strong> - option shows what
             Google Maps think are the most relevant results.
-          </DialogContentText>
+          </Typography>
+          <br />
           <FormControl component="fieldset">
             <FormLabel component="legend">Type:</FormLabel>
             <RadioGroup

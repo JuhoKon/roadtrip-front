@@ -6,12 +6,12 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Chip } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const useStyles = makeStyles({
   root: {
     maxWidth: 500,
-    background: "#e0e0e0b3",
-    marginBottom: 5,
+    marginBottom: 2,
     cursor: "pointer",
     position: "relative",
     textAlign: "center",
@@ -61,7 +61,7 @@ export default function ListItem({
               position: "absolute",
               top: "10px",
               left: "10px",
-              background: "red",
+              background: "#ea4335",
               color: "white",
               borderRadius: "50%",
               height: "40px",
@@ -70,6 +70,7 @@ export default function ListItem({
               textAlign: "center",
               verticalAlign: "middle",
               lineHeight: "40px",
+              boxShadow: "3px 2px 7px 0px rgba(0,0,0,0.75)",
             }}
           >
             {alphabet}
@@ -87,7 +88,7 @@ export default function ListItem({
             right: "0px",
           }}
         >
-          x
+          <DeleteIcon />
         </Button>
 
         {/*           <Typography variant="body2" color="textSecondary" component="p">
@@ -143,35 +144,35 @@ const wantedItems = [
 const getColor = (type: string) => {
   switch (type) {
     case "GAS STATION":
-      return "green";
+      return "#242f40";
     case "LIQUOR STORE":
-      return "blue";
+      return "#5dd39e";
     case "PARK":
-      return "orange";
+      return "#348aa7";
     case "PARKING":
-      return "green";
+      return "#525174";
     case "RESTAURANT":
-      return "blue";
+      return "#513b56";
     case "FOOD":
-      return "purple";
+      return "#242f40";
     case "SPA":
-      return "purple";
+      return "#5dd39e";
     case "STORE":
-      return "green";
+      return "#348aa7";
     case "POINT OF INTEREST":
-      return "blue";
+      return "#525174";
     case "BAR":
-      return "green";
+      return "#513b56";
     case "ATM":
-      return "blue";
+      return "#525174";
     case "LODGING":
       return "orange";
     case "SHOPPING MALL":
       return "purple";
     case "CAFE":
-      return "green";
+      return "#513b56";
     default:
-      return "red";
+      return "#242f40";
   }
 };
 const Badges = (types: any) => {
@@ -218,7 +219,7 @@ const getTypeNames = (items: any): string[] => {
 
   for (let item of res) {
     item = item.toUpperCase();
-    item = item.replaceAll("_", " ");
+    item = item.split("_").join(" ");
     array.push(item);
   }
   return array;

@@ -20,8 +20,9 @@ import {
   secondsToHms,
 } from "./functions/Helpers";
 import { ALPHABET } from "./other/Constants";
+import CustomTabs from "./containers/Tabs/Tabs";
 var polyline = require("google-polyline");
-const { REACT_APP_API_KEY } = process.env;
+
 type Center = {
   lat: number;
   lng: number;
@@ -32,7 +33,7 @@ function App() {
     setShouldCalculateRouteAgain,
   ] = React.useState(true);
   const [markers, setMarkers] = React.useState<any | undefined>(undefined);
-  const [showModal, setShowModal] = React.useState(true);
+  const [showModal] = React.useState(true);
   const [showSettings, setShowSettings] = React.useState(false);
   const [showError, setError] = React.useState(false);
   const [waypointMarkerInfo, setWaypointMarkerInfo] = React.useState<
@@ -52,7 +53,10 @@ function App() {
     google.maps.DirectionsResult | undefined
   >(undefined);
   const [getDirection, setGetDirection] = React.useState(false);
-  const [center, setCenter] = React.useState<Center | undefined>(undefined);
+  const [center, setCenter] = React.useState<Center | undefined>({
+    lat: 61.05499289999999,
+    lng: 28.1896628,
+  });
   const [zoom, setZoom] = React.useState<number | undefined>(undefined);
   const setCenteredStartLocation = (value: PlaceDetailResult | undefined) => {
     if (!value) {
@@ -79,26 +83,32 @@ function App() {
       (element: PlaceDetailResult) => element.place_id === item.place_id
     );
     if (exists) {
+      forceUpdate();
       alert("The location already exists on the list!");
       return;
     }
     const result = await RetrievePlaceDetails(item.place_id);
+    if (listItems.length === 0 || listItems.length === 1) {
+      listItems.push(result);
 
+      forceUpdate();
+      setShouldCalculateRouteAgain(true);
+      return;
+    }
     listItems.splice(listItems.length - 1, 0, result); //second last
     forceUpdate();
     setShouldCalculateRouteAgain(true);
   };
   const removeListItem = (place_id: any) => {
-    setListItems(
-      listItems.filter((item: any) => {
-        return item.place_id !== place_id;
-      })
-    );
-    setWaypointMarkerInfo(
-      waypointMarkerInfo?.filter((item: any) => {
-        return item.place_id !== place_id;
-      })
-    );
+    const newListItems = listItems.filter((item: any) => {
+      return item.place_id !== place_id;
+    });
+    const newWayPointParkers = waypointMarkerInfo?.filter((item: any) => {
+      return item.place_id !== place_id;
+    });
+
+    setListItems(newListItems);
+    setWaypointMarkerInfo(newWayPointParkers);
     forceUpdate();
     setShouldCalculateRouteAgain(true);
   };
@@ -121,7 +131,6 @@ function App() {
       setWaypoints(undefined);
     }
     setDirections(undefined);
-
     setGetDirection(true);
     setShouldCalculateRouteAgain(false);
     setTimeout(() => {
@@ -374,20 +383,33 @@ function App() {
                 center={center}
                 zoom={zoom}
                 directions={directions}
-                addWayPoint={addWayPoint}
+                addWayPoint={(item: any) => {
+                  addWayPoint(item);
+                }}
                 waypointMarkerInfo={waypointMarkerInfo}
                 markers={markers}
               />
             </Grid>
             <Grid item xs={4}>
-              <ListContainer
-                setItems={(items: any) => {
-                  setShouldCalculateRouteAgain(true);
-                  setListItems(items);
-                }}
-                items={listItems ? listItems : []}
-                removeListItem={removeListItem}
-                routeLength={routeLength}
+              <CustomTabs
+                first={
+                  <ListContainer
+                    setItems={(items: any) => {
+                      setShouldCalculateRouteAgain(true);
+                      setListItems(items);
+                    }}
+                    items={listItems}
+                    removeListItem={removeListItem}
+                    routeLength={routeLength}
+                  />
+                }
+                second={
+                  <div
+                    id="directionspanel"
+                    style={{ overflow: "auto", maxHeight: "750px" }}
+                  ></div>
+                }
+                shouldSecondShow={canWeShowSettings()}
               />
             </Grid>
           </Grid>
