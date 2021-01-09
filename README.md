@@ -18,6 +18,8 @@
 
 The application consists of Express.js-backend and React.js frontend. To use the application locally, you need a Google Maps API key. For the time being, a demo is available at: [here](https://roadtrip-planner-gis.herokuapp.com/).
 
+Backend is available at: [here](https://github.com/JuhoKon/roadtrip-backend)
+
 Both the frontend and backend need a Google Maps API key.
 
 For the project I have created two API keys, one for the frontend and one for the backend. The frontend key is restricted to only work from certain URLs to keep it safer to abuse.
