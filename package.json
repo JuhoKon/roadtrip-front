@@ -1,6 +1,16 @@
 {
   "name": "roadtrip",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "author": "Juho Kontiainen",
+  "description": "Web application for planning and creating roadtrips.",
+  "homepage": "https://github.com/JuhoKon/roadtrip-front",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuhoKon/roadtrip-front.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JuhoKon/roadtrip-front/issues"
+  },
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.2",
