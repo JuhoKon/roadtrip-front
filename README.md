@@ -14,33 +14,53 @@
 
 ### ✨ [Demo](https://roadtrip-planner-gis.herokuapp.com/)
 
-## Install
+## About
+
+The application consists of Express.js-backend and React.js frontend. To use the application locally, you need a Google Maps API key. For the time being, a demo is available at: [here](https://roadtrip-planner-gis.herokuapp.com/).
+
+Both the frontend and backend need a Google Maps API key.
+
+For the project I have created two API keys, one for the frontend and one for the backend. The frontend key is restricted to only work from certain URLs to keep it safer to abuse.
+
+## Frontend
+
+The frontend uses the following libraries and APIs:
+
+- Material UI
+- react-google-maps
+- Google Places API, Maps API, Directions API
+
+#### Install
 
 ```sh
 yarn install
 ```
 
-## Usage
+#### Usage
+
+In development, backend should be running in `http://localhost:8080`.
 
 ```sh
 yarn run start
 ```
 
-## Run tests
+#### Run tests
 
 ```sh
 yarn run test
 ```
+
+## Backend
+
+The backend is an Express webserver, which serves as an API for the frontend and is used to aswell serve the React-applications build files.
+
+Backend is available at: [here](https://github.com/JuhoKon/roadtrip-backend)
 
 ## Author
 
 👤 **Juho Kontiainen**
 
 - Github: [@JuhoKon](https://github.com/JuhoKon)
-
-## 🤝 Contributing
-
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/JuhoKon/roadtrip-front/issues). You can also take a look at the [contributing guide](https://github.com/JuhoKon/roadtrip-front/blob/master/CONTRIBUTING.md).
 
 ## Show your support
 
