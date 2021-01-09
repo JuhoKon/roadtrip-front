@@ -1,8 +1,5 @@
-<h1 align="center">Welcome to roadtrip 👋</h1>
+<h1 align="center">Welcome to Roadtrip planner 👋</h1>
 <p>
-  <a href="https://www.npmjs.com/package/roadtrip" target="_blank">
-    <img alt="Version" src="https://img.shields.io/npm/v/roadtrip.svg">
-  </a>
   <a href="https://github.com/JuhoKon/roadtrip-front#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
@@ -39,7 +36,7 @@ yarn run test
 
 👤 **Juho Kontiainen**
 
-* Github: [@JuhoKon](https://github.com/JuhoKon)
+- Github: [@JuhoKon](https://github.com/JuhoKon)
 
 ## 🤝 Contributing
 
@@ -49,5 +46,6 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 Give a ⭐️ if this project helped you!
 
-***
+---
+
 _This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
