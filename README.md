@@ -30,7 +30,7 @@ The frontend uses the following libraries and APIs:
 
 - Material UI
 - [@react-google-maps/api](https://www.npmjs.com/package/@react-google-maps/api)
-- Google Places API, Maps API, Directions API
+- Google Places API, Maps API
 
 #### Install
 
