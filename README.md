@@ -29,7 +29,7 @@ For the project I have created two API keys, one for the frontend and one for th
 The frontend uses the following libraries and APIs:
 
 - Material UI
-- react-google-maps
+- [@react-google-maps/api](https://www.npmjs.com/package/@react-google-maps/api)
 - Google Places API, Maps API, Directions API
 
 #### Install
