@@ -22,7 +22,7 @@ Backend is available at: [here](https://github.com/JuhoKon/roadtrip-backend)
 
 Both the frontend and backend need a Google Maps API key.
 
-For the project I have created two API keys, one for the frontend and one for the backend. The frontend key is restricted to only work from certain URLs to keep it safer to abuse.
+For the project I have created two API keys, one for the frontend and one for the backend. The frontend key is restricted to only work from certain URLs to keep it safer from abuse.
 
 ## Frontend
 
